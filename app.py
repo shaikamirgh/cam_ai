@@ -81,7 +81,7 @@ def run(
             seen += 1
             im0, frame = im0s.copy(), getattr(dataset, 'frame', 0)
 
-            s += '%gx%g ' % im.shape[2:]  # print string
+            #s += '%gx%g ' % im.shape[2:]  # print string
 
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             if len(det):
@@ -93,7 +93,7 @@ def run(
                 # Print results
                 for c in det[:, 5].unique():
                     n = (det[:, 5] == c).sum()  # detections per class
-                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                    s += f"- {n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
                 # Write results
                 for j, (*xyxy, conf, cls) in enumerate(reversed(det[:, :6])):
@@ -104,13 +104,14 @@ def run(
 
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
+        LOGGER.info(f"{s} yo im here ")
 
     # Print results
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
     LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
     if update:
         strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
-    return im0
+    return im0,s
 
 def create_opencv_image_from_stringio(img_stream, cv2_img_flag=1):
     img_stream.seek(0)
@@ -136,9 +137,11 @@ for n, img_file_buffer in enumerate(img_files):
     if img_file_buffer is not None:
         open_cv_image = create_opencv_image_from_stringio(img_file_buffer)
         # predict
-        im0 = run(source=open_cv_image, conf_thres=0.6)
+        im0, detected_labels = run(source=open_cv_image, conf_thres=0.6)
         #print the names of detected objects
-        
+        print(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::")
+        st.subheader("Detected objects are: ")
+        st.write(detected_labels[10:])
         if im0 is not None:
             # show image
             left_col, center_col,last_col = st.columns([1,6,1])
