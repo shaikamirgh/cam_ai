@@ -1,6 +1,6 @@
 # run this object detection app by using command "streamlit run app.py" on terminal
 import streamlit as st
-
+import google.generativeai as palm
 from io import BytesIO
 from datetime import datetime
 
@@ -118,6 +118,11 @@ def create_opencv_image_from_stringio(img_stream, cv2_img_flag=1):
     img_array = np.asarray(bytearray(img_stream.read()), dtype=np.uint8)
     return cv2.imdecode(img_array, cv2_img_flag)
 
+def chat_with_palm(prompt):
+    palm.configure(api_key='AIzaSyDYTiHCkpFbjNB28PKKgCkhi-kpchwv8GA') 
+    response = palm.chat(messages=prompt)
+    answer = response.last
+    return answer
 
 # Interface =========================================================
 
@@ -137,7 +142,7 @@ for n, img_file_buffer in enumerate(img_files):
     if img_file_buffer is not None:
         open_cv_image = create_opencv_image_from_stringio(img_file_buffer)
         # predict
-        im0, detected_labels = run(source=open_cv_image, conf_thres=0.6)
+        im0, detected_labels = run(source=open_cv_image)        #, conf_thres=0.2
         #print the names of detected objects
         print(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::")
         st.subheader("Detected objects are: ")
@@ -148,8 +153,14 @@ for n, img_file_buffer in enumerate(img_files):
             with center_col:
                 st.image(im0, channels="BGR", caption=f'Detection Results ({n+1}/{len(img_files)})')
 
-st.markdown("""
-  <p style='text-align: center; font-size:16px; margin-top: 32px'>
-    AwesomePython @2020
-  </p>
-""", unsafe_allow_html=True)
+    user_prompt = "Given list of objects, guess the place or describe the environment, also give a detail of each of those." + detected_labels[10:]
+    response = chat_with_palm(user_prompt)
+    print("AI Assistant:", response)
+    st.write("AI Assistant:", response)
+
+    question=st.text_input("Ask me anything: ")
+    if question:
+        user_input = question + "Given list of objects are: " + detected_labels[10:]
+        response = chat_with_palm(user_input)
+        print("AI Assistant:", response)
+        st.write("AI Assistant:", response)
