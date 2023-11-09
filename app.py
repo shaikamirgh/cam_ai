@@ -131,9 +131,9 @@ st.set_page_config(
   page_icon="🚀"
 )
 
-st.title('My YOLO App')
-st.markdown('This is an application for object detection using YOLO')
-
+st.title('AIVISION')
+st.subheader('Your AI assistant for vision')
+st.markdown("Take a pic and upload here to detect objects in the image. Then ask me anything about the objects in the image.")
 img_files = st.file_uploader(label="Choose an image files",
                  type=['png', 'jpg', 'jpeg'],
                  accept_multiple_files=True,
