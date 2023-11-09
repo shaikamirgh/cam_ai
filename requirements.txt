@@ -42,3 +42,4 @@ streamlit
 # albumentations>=1.0.3
 # pycocotools>=2.0  # COCO mAP
 # roboflow
+google.generativeai
